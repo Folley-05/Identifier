@@ -4,6 +4,8 @@
 
 const express=require('express')
 
+const { getPeers, getSockets, broadcast }=require('./p2p/p2pserver')
+
 // start application
 const app=express()
 
@@ -22,6 +24,16 @@ app.use(express.json())
 // start routes
 app.get('', (req, res)=>{
     res.status(200).json("hello and welcome")
+})
+app.get('/api/peers', (req, res)=>{
+    res.status(200).json(getPeers())
+})
+app.get('/api/sockets', (req, res)=>{
+    res.status(200).json(getSockets())
+})
+app.get('/api/broadcast', (req, res)=>{
+    broadcast()
+    res.status(200).json("broadcast done")
 })
 
 
