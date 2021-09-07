@@ -4,6 +4,8 @@
 
 const Crypto=require('crypto-js')
 
+const { Identity }=require('./identity')
+
 class Block {
     index
     timestamp
@@ -121,5 +123,8 @@ const createBlock=(data)=>{
 
 
 exports.createBlock=createBlock
+exports.addBlock=addBlock
+exports.getBlockchain=getBlockchain
+exports.replaceChain=replaceChain
 
 

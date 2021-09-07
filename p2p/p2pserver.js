@@ -5,6 +5,7 @@
 const WebSocket=require('ws')
 
 // const { sendMessage, handleMessage }=require('./functions')
+const { addBlock, getBlockchain, replaceChain }=require('../blockchain/blockchain')
 
 // init list of network's peers
 let PEERS=[]
@@ -37,6 +38,7 @@ const initServer=(p2p_port, peer)=>{
             PEERS.push(peer)
             sendMessage({type: 'connection', text: "hello, i'am new on network", data: p2p_port}, con)
             sendMessage({type: 'peers request', text: "can i get your peers", data: null}, con)
+            sendMessage({type: 'blockchain request', text: "can i get your peers", data: null}, con)
         })
         con.on('message', message=>{
             handleMessage(message)
@@ -52,6 +54,19 @@ const getSockets=()=>SOCKETS
 const sendMessage=(message, ws)=>{
     let chain=JSON.stringify(message)
     ws.send(chain)
+}
+
+const broadcast=(message)=>{
+    SOCKETS.forEach(socket => {
+        sendMessage({type: 'text', text: "DIFFUSSION PROTOCOL", data: null}, socket)
+    })
+}
+
+const broadcastBlock=(block)=>{
+    SOCKETS.forEach(socket=>{
+        sendMessage({type: 'block', text: "last block created", data: block}, socket)
+    })
+    console.log("new block broadcast")
 }
 
 const connectTopeers=peers=>{
@@ -77,27 +92,32 @@ const handleMessage=(chain, ws)=>{
             console.log("message received : ", message.text)
             let response={type: 'text', text: "you have been added", data: null}
             sendMessage(response, ws)
-            break;
+            break
         case 'peers request' :
-            console.log("my peers", PEERS)
+            // console.log("my peers", PEERS)
             sendMessage({type: 'peers', text: "here is my peers", data: PEERS}, ws)
             break
         case 'peers' :
             console.log("peers received ", message.data)
             connectTopeers(message.data)
             break
+        case 'blockchain request' :
+            sendMessage({type: 'blockchain', text: "here is my peers", data: getBlockchain()}, ws)
+            break
+        case 'blockchain' :
+            // console.log("i received blockchain")
+            replaceChain(message.data)
+            break
+        case 'block' :
+            console.log("i receive a new block")
+            addBlock(message.data)
+            break
         case 'text' :
             console.log("message received : ", message.text)
             break
         default:
-            break;
+            break
     }
-}
-
-const broadcast=(message)=>{
-    SOCKETS.forEach(socket => {
-        sendMessage({type: 'text', text: "DIFFUSSION PROTOCOL", data: null}, socket)
-    })
 }
 
 exports.initServer=initServer
@@ -105,3 +125,4 @@ exports.addPeers=addPeers
 exports.getPeers=getPeers
 exports.getSockets=getSockets
 exports.broadcast=broadcast
+exports.broadcastBlock=broadcastBlock

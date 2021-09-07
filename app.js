@@ -4,8 +4,8 @@
 
 const express=require('express')
 
-const { getPeers, getSockets, broadcast }=require('./p2p/p2pserver')
-const { createBlock }=require('./blockchain/blockchain')
+const { getPeers, getSockets, broadcast, broadcastBlock }=require('./p2p/p2pserver')
+const { createBlock, getBlockchain }=require('./blockchain/blockchain')
 
 // start application
 const app=express()
@@ -26,18 +26,23 @@ app.use(express.json())
 app.get('', (req, res)=>{
     res.status(200).json("hello and welcome")
 })
+app.get('/api/broadcast', (req, res)=>{
+    broadcast()
+    res.status(200).json("broadcast done")
+})
 app.get('/api/peers', (req, res)=>{
     res.status(200).json(getPeers())
 })
 app.get('/api/sockets', (req, res)=>{
     res.status(200).json(getSockets())
 })
-app.get('/api/broadcast', (req, res)=>{
-    broadcast()
-    res.status(200).json("broadcast done")
+app.get('/api/blockchain', (req, res)=>{
+    res.status(200).json(getBlockchain())
 })
 app.post('/api/block', (req, res)=>{
-    if(createBlock(req.body.data)) {
+    let block=createBlock(req.body.data)
+    if(block) {
+        broadcastBlock(block)
         res.status(200).json({response: "block create"})
     }
     else res.status(501).json({response: "fail to create block"})
