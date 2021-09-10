@@ -6,12 +6,9 @@ const fs=require('fs')
 
 const { signMessage, verifyMessage }=require('../signature')
 
-const http_port=process.env.HTTP_PORT || 4000
+const http_port=process.env.HTTP_PORT || 4000+''
 
 const privateKey = fs.readFileSync('./keys/private_'+http_port+'.pem')
-const publicKey = fs.readFileSync('./keys/public_'+http_port+'.pem')
-
-console.log(privateKey)
 
 class Identity {
     names
@@ -28,13 +25,13 @@ class Identity {
     address
     issueDate
     expiryDate
-    identificationPost
     picture
     fingerPrint
+    identificationPost
     previousHash
     hash
     identitySignature
-    constructor(names, surnames, birthDate, birthPlace, sexe, height, proffession, signature, father, mother, SM, address, issueDate, expiryDate, identificationPost, picture, fingerPrint, previousHash, hash) {
+    constructor(names, surnames, birthDate, birthPlace, sexe, height, proffession, signature, father, mother, SM, address, issueDate, expiryDate, picture, fingerPrint, identificationPost, previousHash, hash) {
         this.names=names
         this.surnames=surnames
         this.birthDate=birthDate
@@ -49,9 +46,9 @@ class Identity {
         this.address=address
         this.issueDate=issueDate
         this.expiryDate=expiryDate
-        this.identificationPost=identificationPost
         this.picture=picture
         this.fingerPrint=fingerPrint
+        this.identificationPost=identificationPost
         this.previousHash=previousHash
         this.hash=hash
         this.identitySignature=signMessage(hash, privateKey)
@@ -73,7 +70,7 @@ const getMempool=()=>MEMPOOL
 
 
 const calculateHash=(names, surnames, birthDate, birthPlace, sexe, height, proffession, signature, father, mother, SM, address,
-    issueDate, expiryDate, identificationPost, picture, fingerPrint, previousHash)=>Crypto.SHA256(names+surnames+birthDate+birthPlace+sexe+height+proffession+signature+father+mother+SM+address+issueDate+expiryDate+identificationPost+picture+fingerPrint+previousHash).toString()
+    issueDate, expiryDate, picture, fingerPrint, identificationPost, previousHash)=>Crypto.SHA256(names+surnames+birthDate+birthPlace+sexe+height+proffession+signature+father+mother+SM+address+issueDate+expiryDate+picture+fingerPrint+identificationPost+previousHash).toString()
 
     
 // let pascal=new Identity("pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", calculateHash("pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal" ))
@@ -82,12 +79,12 @@ const calculateHash=(names, surnames, birthDate, birthPlace, sexe, height, proff
 
 const calculateHashForIdentity=(identity)=>{
     return calculateHash(identity.names, identity.surnames, identity.birthDate, identity.birthPlace, identity.sexe, identity.height, identity.proffession, identity.signature, identity.father, identity.mother, identity.SM, identity.address,
-        identity.issueDate, identity.expiryDate, identity.identificationPost, identity.picture, identity.fingerPrint, identity.previousHash)
+        identity.issueDate, identity.expiryDate, identity.picture, identity.fingerPrint, identity.identificationPost, identity.previousHash)
 }
 
-const createIdentity=()=>new Identity("pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", 
-    "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", calculateHash("pascal", "pascal", "pascal", "pascal", "pascal", "pascal",
-    "pascal", "pascal", "pascal", "pascal", "pascal", "pascal", "pascal"))
+const createIdentity=()=>new Identity("pascal", "pascal", 120, "pascal", "pascal", 190, "pascal", "pascal", "pascal", "pascal", 
+    "pascal", "pascal", +new Date, +new Date, "pascal", "pascal", http_port, '', calculateHash("pascal", "pascal", 120, "pascal", "pascal", 190, "pascal", "pascal", "pascal", "pascal", 
+    "pascal", "pascal", +new Date, +new Date, "pascal", "pascal", http_port, ''))
 
 // const createIdentity=(identity)=>new Identity(identity.names, identity.surnames, identity.birthDate, identity.birthPlace,
 //     identity.sexe, identity.height, identity.proffession, identity.signature, identity.father, identity.mother, identity.SM,
@@ -102,7 +99,7 @@ const isValidIdentityStructure=(identity)=>{
      && typeof identity.sexe==='string'
      && typeof identity.height==='number'
      && typeof identity.proffession==='string'
-    //  && typeof identity.signature
+     && typeof identity.signature
      && typeof identity.father==='string'
      && typeof identity.mother==='string'
      && typeof identity.SM==='string'
@@ -117,6 +114,11 @@ const isValidIdentityStructure=(identity)=>{
      && typeof identity.identitySignature==='string'
 }
 
+const checkSignature=(signature, hash, post)=>{
+    const publicKey = fs.readFileSync('./keys/public_'+post+'.pem')
+    return verifyMessage(signature, hash, publicKey)
+}
+
 const isValidIdentity=(identity)=>{
     if(!isValidIdentityStructure(identity)) {
         console.log("identity structure is invalid")
@@ -126,8 +128,11 @@ const isValidIdentity=(identity)=>{
         console.log("hash is invalid")
         return false
     }
+    if(checkSignature(identity.signature, identity.hash, identity.identificationPost)) {
+        console.log("hash is invalid")
+        return false
+    }
     /**
-     * add identitySignature verification
      * add finger print verification
      * add picture verification 
      */
@@ -136,7 +141,7 @@ const isValidIdentity=(identity)=>{
 }
 
 const pushIdentity=(identity)=>{
-    if(isValidIdentity) {
+    if(isValidIdentity(identity)) {
         console.log("add identity to mempool")
         MEMPOOL.push(identity)
         return true

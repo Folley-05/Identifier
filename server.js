@@ -8,7 +8,6 @@ const { pipeline } = require('stream')
 // get ports of servers
 const http_port=process.env.HTTP_PORT || 4000
 const p2p_port=process.env.P2P_PORT || 6000
-const peer=process.env.PEERS || null
 console.log(`server http on port ${http_port} and websocket on port ${p2p_port}`)
 
 // generate private and public key
@@ -19,7 +18,7 @@ const { initServer }=require('./src/p2p/p2pserver')
 const app=require('./src/app')
 
 // init p2p server
-initServer(p2p_port, peer)
+initServer()
 
 // set port of server
 app.set('port', http_port)

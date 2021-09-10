@@ -7,7 +7,6 @@ const cryptoJs=require('crypto')
 // get ports of servers
 
 const signMessage=(message, privateKey)=>{
-    console.log("les params ", message, privateKey)
     const sign=cryptoJs.createSign('SHA256')
     sign.update(message)
     sign.end

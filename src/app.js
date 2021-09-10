@@ -56,7 +56,7 @@ app.post('/api/identity', (req, res)=>{
     if(id) {
         broadcastIdentity(id)
         res.status(200).json({response: "identity diffused"})
-    } else res.status(200).json({response: "identity diffused"})
+    } else res.status(200).json({response: "identity not diffused"})
 })
 
 

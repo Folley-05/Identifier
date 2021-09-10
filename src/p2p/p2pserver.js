@@ -8,16 +8,21 @@ const WebSocket=require('ws')
 const { addBlock, getBlockchain, replaceChain }=require('../blockchain/blockchain')
 const { getMempool, setMempool, pushIdentity }=require('../blockchain/identity')
 
+
+// get ports of servers
+const http_port=process.env.HTTP_PORT || 4000
+const p2p_port=process.env.P2P_PORT || 6000
+const peer=process.env.PEERS || null
+
 // init list of network's peers
 let PEERS=[]
 let SOCKETS=[]
-let port
+
 
 let tailUrl="ws://localhost:"
 
 // init p2p server function
-const initServer=(p2p_port, peer)=>{
-    port=p2p_port
+const initServer=()=>{
     // create web socket instance 
     const wss=new WebSocket.Server({port: p2p_port})
     console.log("socket create on port "+p2p_port)
@@ -74,7 +79,7 @@ const broadcastIdentity=(identity)=>{
     SOCKETS.forEach(socket=>{
         sendMessage({type: 'identity', text: "last identity created", data: identity}, socket)
     })
-    console.log("new block identity")
+    console.log("new identity broadcast")
 }
 
 const connectTopeers=peers=>{
@@ -83,7 +88,7 @@ const connectTopeers=peers=>{
         con.on('open', ()=>{
             SOCKETS.push(con)
             PEERS.push(peer)
-            let message={type: 'connection', text: "hello, i'am new on network. i get your contact", data: port}
+            let message={type: 'connection', text: "hello, i'am new on network. i get your contact", data: http_port}
             sendMessage(message, con)
         })
         con.on('message', message=>{
