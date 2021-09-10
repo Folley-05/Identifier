@@ -4,12 +4,6 @@
 
 const http=require('http')
 const { pipeline } = require('stream')
-const crypto=require('crypto')
-const fs=require('fs')
-
-const { initServer }=require('./p2p/p2pserver')
-const app=require('./app')
-
 
 // get ports of servers
 const http_port=process.env.HTTP_PORT || 4000
@@ -17,20 +11,12 @@ const p2p_port=process.env.P2P_PORT || 6000
 const peer=process.env.PEERS || null
 console.log(`server http on port ${http_port} and websocket on port ${p2p_port}`)
 
-
 // generate private and public key
-const {privateKey, publicKey}=crypto.generateKeyPairSync('rsa', {
-    modulusLength: 512,
-    publicKeyEncoding: { type: 'spki', format: 'pem' },
-    privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-})
+const generateKey=require('./src/genKeyPair')
+generateKey(http_port)
 
-fs.writeFile('private_'+http_port+'.pem', privateKey, (err)=>{
-    if(err) throw err
-})
-fs.writeFile('public_'+http_port+'.pem', publicKey, (err)=>{
-    if(err) throw err
-})
+const { initServer }=require('./src/p2p/p2pserver')
+const app=require('./src/app')
 
 // init p2p server
 initServer(p2p_port, peer)
