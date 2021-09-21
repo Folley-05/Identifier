@@ -115,8 +115,10 @@ const replaceChain=(newChain)=>{
 }
 
 const createBlock=(data)=>{
-    let block=generateNextBlock(data)
-    return addBlock(block)
+    if(data) {
+        let block=generateNextBlock(data)
+        return addBlock(block)
+    } else return false
 }
 
 

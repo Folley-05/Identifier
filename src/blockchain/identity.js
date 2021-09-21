@@ -82,14 +82,14 @@ const calculateHashForIdentity=(identity)=>{
         identity.issueDate, identity.expiryDate, identity.picture, identity.fingerPrint, identity.identificationPost, identity.previousHash)
 }
 
-const createIdentity=()=>new Identity("pascal", "pascal", 120, "pascal", "pascal", 190, "pascal", "pascal", "pascal", "pascal", 
-    "pascal", "pascal", +new Date, +new Date, "pascal", "pascal", http_port, '', calculateHash("pascal", "pascal", 120, "pascal", "pascal", 190, "pascal", "pascal", "pascal", "pascal", 
-    "pascal", "pascal", +new Date, +new Date, "pascal", "pascal", http_port, ''))
+// const createIdentity=()=>new Identity("pascal", "pascal", 120, "pascal", "pascal", 190, "pascal", "pascal", "pascal", "pascal", 
+//     "pascal", "pascal", +new Date, +new Date, "pascal", "pascal", http_port, '', calculateHash("pascal", "pascal", 120, "pascal", "pascal", 190, "pascal", "pascal", "pascal", "pascal", 
+//     "pascal", "pascal", +new Date, +new Date, "pascal", "pascal", http_port, ''))
 
-// const createIdentity=(identity)=>new Identity(identity.names, identity.surnames, identity.birthDate, identity.birthPlace,
-//     identity.sexe, identity.height, identity.proffession, identity.signature, identity.father, identity.mother, identity.SM,
-//     identity.address, identity.issueDate, identity.expiryDate, identity.identificationPost, identity.picture,
-//     identity.fingerPrint, identity.previousHash, calculateHashForIdentity(identity))
+const createIdentity=(identity)=>new Identity(identity.names, identity.surnames, identity.birthDate, identity.birthPlace,
+    identity.sexe, identity.height, identity.proffession, identity.signature, identity.father, identity.mother,
+    identity.SM, identity.address, identity.issueDate, identity.expiryDate, identity.picture, identity.fingerPrint,
+    http_port, identity.previousHash, calculateHashForIdentity(identity))
 
 const isValidIdentityStructure=(identity)=>{
     return typeof identity.names==='string'
@@ -150,7 +150,7 @@ const pushIdentity=(identity)=>{
 }
 
 const addIdentity=(identity)=>{
-    let id=createIdentity(identity)
+    let id=createIdentity({...identity, identificationPost: http_port})
     if(pushIdentity(id)) return id
     else return false
 }
@@ -177,6 +177,7 @@ const setMempool=(mempool)=>{
 }
 
 const mineIdentities=(pool)=>{
+    if(MEMPOOL.length<3) return false
     let identities=[]
     let number=0
     while((number<numberAddress) && MEMPOOL.length) {
@@ -196,6 +197,7 @@ exports.getMempool=getMempool
 exports.setMempool=setMempool
 exports.pushIdentity=pushIdentity
 exports.addIdentity=addIdentity
+exports.mineIdentities=mineIdentities
 
 
 

@@ -4,9 +4,9 @@
 
 const express=require('express')
 
-const { getPeers, getSockets, broadcast, broadcastBlock, broadcastIdentity }=require('./p2p/p2pserver')
+const { getPeers, getSockets, broadcast, broadcastBlock, broadcastIdentity, broadcastMempool }=require('./p2p/p2pserver')
 const { createBlock, getBlockchain }=require('./blockchain/blockchain')
-const { getMempool, addIdentity }=require('./blockchain/identity')
+const { getMempool, addIdentity, mineIdentities }=require('./blockchain/identity')
 
 // start application
 const app=express()
@@ -43,20 +43,29 @@ app.get('/api/blockchain', (req, res)=>{
 app.get('/api/mempool', (req, res)=>{
     res.status(200).json(getMempool())
 })
-app.post('/api/block', (req, res)=>{
-    let block=createBlock(req.body.data)
-    if(block) {
-        broadcastBlock(block)
-        res.status(200).json({response: "block create"})
-    }
-    else res.status(501).json({response: "fail to create block"})
-})
+// app.post('/api/block', (req, res)=>{
+//     let block=createBlock(req.body.data)
+//     if(block) {
+//         broadcastBlock(block)
+//         res.status(200).json({response: "block create"})
+//     }
+//     else res.status(501).json({response: "fail to create block"})
+// })
 app.post('/api/identity', (req, res)=>{
     let id=addIdentity(req.body)
     if(id) {
         broadcastIdentity(id)
         res.status(200).json({response: "identity diffused"})
     } else res.status(200).json({response: "identity not diffused"})
+})
+app.post('/api/mineblock', (req, res)=>{
+    let block=createBlock(mineIdentities())
+    if(block) {
+        broadcastBlock(block)
+        broadcastMempool(getMempool())
+        res.status(200).json({response: "block create"})
+    }
+    else res.status(501).json({response: "fail to create block"})
 })
 
 

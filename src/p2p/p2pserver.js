@@ -3,6 +3,7 @@
  */
 
 const WebSocket=require('ws')
+const fs=require('fs')
 
 // const { sendMessage, handleMessage }=require('./functions')
 const { addBlock, getBlockchain, replaceChain }=require('../blockchain/blockchain')
@@ -44,7 +45,7 @@ const initServer=()=>{
             PEERS.push(peer)
             sendMessage({type: 'connection', text: "hello, i'am new on network", data: p2p_port}, con)
             sendMessage({type: 'peers request', text: "can i get your peers", data: null}, con)
-            // sendMessage({type: 'blockchain request', text: "can i get your peers", data: null}, con)
+            // sendMessage({type: 'blockchain request', text: "can i get your blockchain", data: null}, con)
         })
         con.on('message', message=>{
             handleMessage(message)
@@ -75,6 +76,13 @@ const broadcastBlock=(block)=>{
     console.log("new block broadcast")
 }
 
+const broadcastMempool=(mempool)=>{
+    SOCKETS.forEach(socket=>{
+        sendMessage({type: 'mempool', text: "last block created", data: mempool}, socket)
+    })
+    console.log("mempool broadcast")
+}
+
 const broadcastIdentity=(identity)=>{
     SOCKETS.forEach(socket=>{
         sendMessage({type: 'identity', text: "last identity created", data: identity}, socket)
@@ -103,8 +111,10 @@ const handleMessage=(chain, ws)=>{
         case 'connection':
             addPeers(message.data)
             console.log("message received : ", message.text)
-            let response={type: 'text', text: "you have been added", data: null}
-            sendMessage(response, ws)
+            let key=fs.readFileSync('./keys/public_'+http_port+'.pem', 'utf8')
+            // console.log("here is my public key : ", key)
+            sendMessage({type: 'text', text: "you have been added", data: null}, ws)
+            sendMessage({type: 'public_key', text: "here is my public key", data: key}, ws)
             sendMessage({type: 'blockchain', text: "here is my peers", data: getBlockchain()}, ws)
             sendMessage({type: 'mempool', text: "here is my peers", data: getMempool()}, ws)
             break
@@ -122,6 +132,10 @@ const handleMessage=(chain, ws)=>{
         case 'blockchain' :
             // console.log("i received blockchain")
             replaceChain(message.data)
+            break
+        case 'public_key' :
+            console.log("i receive public key")
+            // addBlock(message.data)
             break
         case 'block' :
             console.log("i receive a new block")
@@ -152,4 +166,5 @@ exports.getPeers=getPeers
 exports.getSockets=getSockets
 exports.broadcast=broadcast
 exports.broadcastBlock=broadcastBlock
+exports.broadcastMempool=broadcastMempool
 exports.broadcastIdentity=broadcastIdentity
