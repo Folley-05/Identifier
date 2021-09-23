@@ -7,8 +7,10 @@ const fs=require('fs')
 const { signMessage, verifyMessage }=require('../signature')
 
 const http_port=process.env.HTTP_PORT || 4000+''
+const name=process.env.NAME || 'DGSN'
 
-const privateKey = fs.readFileSync('./keys/private_'+http_port+'.pem')
+const privateKey = fs.readFileSync('./keys/private_'+name+'.pem')
+// console.log(privateKey)
 
 class Identity {
     names
@@ -89,7 +91,7 @@ const calculateHashForIdentity=(identity)=>{
 const createIdentity=(identity)=>new Identity(identity.names, identity.surnames, identity.birthDate, identity.birthPlace,
     identity.sexe, identity.height, identity.proffession, identity.signature, identity.father, identity.mother,
     identity.SM, identity.address, identity.issueDate, identity.expiryDate, identity.picture, identity.fingerPrint,
-    http_port, identity.previousHash, calculateHashForIdentity(identity))
+    identity.identificationPost, identity.previousHash, calculateHashForIdentity(identity))
 
 const isValidIdentityStructure=(identity)=>{
     return typeof identity.names==='string'
@@ -150,7 +152,7 @@ const pushIdentity=(identity)=>{
 }
 
 const addIdentity=(identity)=>{
-    let id=createIdentity({...identity, identificationPost: http_port})
+    let id=createIdentity({...identity, identificationPost: name})
     if(pushIdentity(id)) return id
     else return false
 }
@@ -187,7 +189,7 @@ const mineIdentities=(pool)=>{
             number++
         }
     }
-    if(identities.length) return JSON.stringify(identities)
+    if(identities.length) return identities // JSON.stringify(identities)
     else return false
 }
 

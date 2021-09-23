@@ -14,6 +14,7 @@ const { getMempool, setMempool, pushIdentity }=require('../blockchain/identity')
 const http_port=process.env.HTTP_PORT || 4000
 const p2p_port=process.env.P2P_PORT || 6000
 const peer=process.env.PEERS || null
+const name=process.env.NAME || 'DGSN'
 
 // init list of network's peers
 let PEERS=[]
@@ -111,7 +112,7 @@ const handleMessage=(chain, ws)=>{
         case 'connection':
             addPeers(message.data)
             console.log("message received : ", message.text)
-            let key=fs.readFileSync('./keys/public_'+http_port+'.pem', 'utf8')
+            let key=fs.readFileSync('./keys/public_'+name+'.pem', 'utf8')
             // console.log("here is my public key : ", key)
             sendMessage({type: 'text', text: "you have been added", data: null}, ws)
             sendMessage({type: 'public_key', text: "here is my public key", data: key}, ws)
@@ -135,7 +136,6 @@ const handleMessage=(chain, ws)=>{
             break
         case 'public_key' :
             console.log("i receive public key")
-            // addBlock(message.data)
             break
         case 'block' :
             console.log("i receive a new block")

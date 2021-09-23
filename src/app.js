@@ -5,7 +5,7 @@
 const express=require('express')
 
 const { getPeers, getSockets, broadcast, broadcastBlock, broadcastIdentity, broadcastMempool }=require('./p2p/p2pserver')
-const { createBlock, getBlockchain }=require('./blockchain/blockchain')
+const { createBlock, getBlockchain, getPureBlockchain }=require('./blockchain/blockchain')
 const { getMempool, addIdentity, mineIdentities }=require('./blockchain/identity')
 
 // start application
@@ -39,6 +39,9 @@ app.get('/api/sockets', (req, res)=>{
 })
 app.get('/api/blockchain', (req, res)=>{
     res.status(200).json(getBlockchain())
+})
+app.get('/api/pureblockchain', (req, res)=>{
+    res.status(200).json(getPureBlockchain())
 })
 app.get('/api/mempool', (req, res)=>{
     res.status(200).json(getMempool())

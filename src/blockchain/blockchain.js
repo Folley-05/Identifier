@@ -28,7 +28,16 @@ const genesisBlock=new Block(0, 1630928127607, null, "the genesis block", '0x000
 // the blockchain
 let BLOCKCHAIN=[genesisBlock]
 
-const getBlockchain=()=>BLOCKCHAIN
+const getBlockchain=()=>{
+    let blocks=[]
+    BLOCKCHAIN.forEach(block=>{
+        if(block.index===0) return blocks.push(block)
+        else return blocks.push({...block, data: JSON.parse(block.data)})
+    })
+    return blocks
+}
+
+const getPureBlockchain=()=>BLOCKCHAIN
 
 const getLastBlock=()=>BLOCKCHAIN[BLOCKCHAIN.length-1]
 
@@ -128,5 +137,6 @@ exports.createBlock=createBlock
 exports.addBlock=addBlock
 exports.getBlockchain=getBlockchain
 exports.replaceChain=replaceChain
+exports.getPureBlockchain=getPureBlockchain
 
 
