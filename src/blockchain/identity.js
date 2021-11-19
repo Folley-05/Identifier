@@ -66,7 +66,7 @@ let MEMPOOL=[]
 let FINGERPRINT=[]
 
 // number of address mine a time
-const numberAddress=5
+const numberAddress=1
 
 const getMempool=()=>MEMPOOL
 
@@ -101,7 +101,7 @@ const isValidIdentityStructure=(identity)=>{
      && typeof identity.sexe==='string'
      && typeof identity.height==='number'
      && typeof identity.proffession==='string'
-     && typeof identity.signature
+    //  && typeof identity.signature
      && typeof identity.father==='string'
      && typeof identity.mother==='string'
      && typeof identity.SM==='string'
@@ -134,10 +134,6 @@ const isValidIdentity=(identity)=>{
         console.log("hash is invalid")
         return false
     }
-    /**
-     * add finger print verification
-     * add picture verification 
-     */
     return true
 
 }
@@ -152,6 +148,7 @@ const pushIdentity=(identity)=>{
 }
 
 const addIdentity=(identity)=>{
+    // console.log(identity)
     let id=createIdentity({...identity, identificationPost: name})
     if(pushIdentity(id)) return id
     else return false
@@ -179,10 +176,10 @@ const setMempool=(mempool)=>{
 }
 
 const mineIdentities=(pool)=>{
-    if(MEMPOOL.length<3) return false
+    if(MEMPOOL.length<1) return false
     let identities=[]
     let number=0
-    while((number<numberAddress) && MEMPOOL.length) {
+    while((number<5) && MEMPOOL.length) {
         let identity=MEMPOOL.shift()
         if(isValidIdentity(identity)) {
             identities.push(identity)

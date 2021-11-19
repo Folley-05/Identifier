@@ -23,7 +23,7 @@ class Block {
 }
 
 // the first block of the chain
-const genesisBlock=new Block(0, 1630928127607, null, "the genesis block", '0x0000000000')
+const genesisBlock=new Block(0, 1630928127607, null, "premier block", '0x0000000000')
 
 // the blockchain
 let BLOCKCHAIN=[genesisBlock]
@@ -130,6 +130,20 @@ const createBlock=(data)=>{
     } else return false
 }
 
+const getIdentities=()=>{
+    let identities=[]
+    BLOCKCHAIN.map(block=>{
+        if(block.index!==0) {
+            let data=JSON.parse(block.data)
+            data.map(identity=>identities.push(identity))
+        }
+    })
+    return identities
+}
+const getIdentity=(hash)=>{
+    let ID=getIdentities()
+    return ID.filter(id=>id.hash===hash)
+}
 
 
 
@@ -138,5 +152,7 @@ exports.addBlock=addBlock
 exports.getBlockchain=getBlockchain
 exports.replaceChain=replaceChain
 exports.getPureBlockchain=getPureBlockchain
+exports.getIdentities=getIdentities
+exports.getIdentity=getIdentity
 
 

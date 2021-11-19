@@ -31,6 +31,7 @@ const initServer=()=>{
     wss.on('connection', ws=>{
         console.log("new connection received ")
         SOCKETS.push(ws)
+        // console.log("here is the socket", ws) 
         const message={type: 'text', text:"hello, welcome on network", data: null}
         sendMessage(message, ws)
         ws.on('message', message=>{
@@ -115,7 +116,7 @@ const handleMessage=(chain, ws)=>{
             let key=fs.readFileSync('./keys/public_'+name+'.pem', 'utf8')
             // console.log("here is my public key : ", key)
             sendMessage({type: 'text', text: "you have been added", data: null}, ws)
-            sendMessage({type: 'public_key', text: "here is my public key", data: key}, ws)
+            sendMessage({type: 'public_key', text: "here is my public key", data: {key: key, name: name}}, ws)
             sendMessage({type: 'blockchain', text: "here is my peers", data: getBlockchain()}, ws)
             sendMessage({type: 'mempool', text: "here is my peers", data: getMempool()}, ws)
             break
@@ -136,6 +137,7 @@ const handleMessage=(chain, ws)=>{
             break
         case 'public_key' :
             console.log("i receive public key")
+            fs.writeFileSync('./keys/'+message.data.name+'.pem', message.data.key)
             break
         case 'block' :
             console.log("i receive a new block")
